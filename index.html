@@ -382,12 +382,22 @@ function openLb(i){
   lbCounter.textContent=(i+1)+" / "+imgs.length;
   lb.classList.add("open");
   document.body.classList.add("no-scroll");
+  history.pushState({lb:true},'');
 }
 function closeLb(){
+  if(!lb.classList.contains("open")) return;
   lb.classList.remove("open");
   document.body.classList.remove("no-scroll");
   lbImg.src="";
+  if(history.state&&history.state.lb) history.back();
 }
+window.addEventListener("popstate",function(){
+  if(lb.classList.contains("open")){
+    lb.classList.remove("open");
+    document.body.classList.remove("no-scroll");
+    lbImg.src="";
+  }
+});
 function lbNav(dir){
   lbIdx=(lbIdx+dir+imgs.length)%imgs.length;
   lbImg.src=imgs[lbIdx];
