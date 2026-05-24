@@ -62,7 +62,8 @@ body.no-scroll{overflow:hidden;}
 @keyframes floatDove{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-8px) rotate(3deg)}}
 
 /* ── MUSIC ── */
-.music-btn{position:fixed;bottom:24px;right:20px;z-index:100;width:52px;height:52px;border-radius:50%;background:var(--green);border:none;cursor:pointer;padding:0;transition:transform .2s ease,opacity .3s ease;font-size:26px;color:var(--bg);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.3);}
+.music-btn{position:fixed;bottom:24px;right:20px;z-index:100;width:52px;height:52px;border-radius:50%;background:var(--green);border:none;cursor:pointer;padding:0;transition:transform .2s ease,opacity .3s ease,background .3s ease,color .3s ease;font-size:26px;color:var(--bg);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.3);}
+.music-btn.on-cover{background:var(--bg);color:var(--green);}
 .music-btn img{display:none;}
 .music-btn.muted{opacity:.38;}
 .music-btn:active{transform:scale(.92);}
@@ -455,6 +456,16 @@ lb.addEventListener("click",function(e){if(e.target===lb)closeLb();});
 })();
 
 /* ── 음악 ── */
+/* ── 음악버튼 색 반전 (커버 위) ── */
+(function(){
+  var btn=document.getElementById("musicBtn");
+  btn.classList.add("on-cover");
+  var coverEl=document.querySelector(".cover");
+  new IntersectionObserver(function(entries){
+    btn.classList.toggle("on-cover", entries[0].isIntersecting);
+  },{threshold:0.05}).observe(coverEl);
+})();
+
 var playing=true, bgm=document.getElementById("bgm");
 bgm.addEventListener("loadedmetadata",function(){bgm.currentTime=58;});
  /* 자동재생: 브라우저 정책상 첫 터치 후 실행 */
