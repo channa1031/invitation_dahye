@@ -126,16 +126,14 @@ section.visible{opacity:1;transform:translateY(0);}
 .gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;}
 .gallery-item{aspect-ratio:2/3;overflow:hidden;cursor:pointer;background:#d8d0c8;}
 .gallery-item img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease;}
-.gallery-item:active img{transform:scale(1.04);}
+
 
 /* ── LIGHTBOX (핀치 줌 지원) ── */
-.lightbox{display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.95);align-items:center;justify-content:center;touch-action:none;}
+.lightbox{display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.95);align-items:center;justify-content:center;}
 .lightbox.open{display:flex;}
-.lb-img-wrap{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;touch-action:none;}
-.lb-img-wrap img{max-width:100%;max-height:100%;object-fit:contain;display:block;transform-origin:center center;transition:none;user-select:none;-webkit-user-drag:none;}
+.lb-img-wrap{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.lb-img-wrap img{max-width:100%;max-height:100%;object-fit:contain;display:block;user-select:none;-webkit-user-drag:none;}
 .lb-close{position:fixed;top:16px;right:16px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;color:white;cursor:pointer;background:rgba(255,255,255,.15);border:none;border-radius:50%;z-index:810;}
-.lb-prev,.lb-next{position:fixed;top:50%;transform:translateY(-50%);width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:28px;color:white;cursor:pointer;background:rgba(255,255,255,.15);border:none;border-radius:50%;z-index:810;}
-.lb-prev{left:8px;}.lb-next{right:8px;}
 .lb-counter{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.6);font-size:12px;letter-spacing:2px;z-index:810;}
 
 /* ── MAP ── */
@@ -347,11 +345,9 @@ footer p{font-size:10px;letter-spacing:2px;line-height:2.6;color:rgba(227,222,21
 <!-- 라이트박스 -->
 <div class="lightbox" id="lightbox">
 <button class="lb-close" id="lbClose">✕</button>
-<button class="lb-prev" id="lbPrev">‹</button>
 <div class="lb-img-wrap" id="lbImgWrap">
 <img id="lbImg" src="" alt="">
 </div>
-<button class="lb-next" id="lbNext">›</button>
 <div class="lb-counter" id="lbCounter"></div>
 </div>
 
@@ -371,19 +367,14 @@ imgs.forEach(function(src,i){
   grid.appendChild(d);
 });
 
-/* ── 라이트박스 + 핀치줌 ── */
+/* ── 라이트박스 (스와이프 네비) ── */
 var lb=document.getElementById("lightbox");
-var lbImgWrap=document.getElementById("lbImgWrap");
 var lbImg=document.getElementById("lbImg");
 var lbCounter=document.getElementById("lbCounter");
-var lbIdx=0;
-var scale=1, lastScale=1;
-var startDist=0, startScale=1;
-var isDragging=false, startX=0, startY=0, tx=0, ty=0, lastTx=0, lastTy=0;
+var lbIdx=0, swipeStartX=0, swipeStartY=0;
 
 function openLb(i){
-  lbIdx=i; scale=1; tx=0; ty=0; lastTx=0; lastTy=0;
-  lbImg.style.transform="scale(1) translate(0,0)";
+  lbIdx=i;
   lbImg.src=imgs[i];
   lbCounter.textContent=(i+1)+" / "+imgs.length;
   lb.classList.add("open");
@@ -396,60 +387,23 @@ function closeLb(){
 }
 function lbNav(dir){
   lbIdx=(lbIdx+dir+imgs.length)%imgs.length;
-  scale=1; tx=0; ty=0;
-  lbImg.style.transform="scale(1) translate(0,0)";
   lbImg.src=imgs[lbIdx];
   lbCounter.textContent=(lbIdx+1)+" / "+imgs.length;
 }
-function applyTransform(){
-  lbImg.style.transform="scale("+scale+") translate("+tx+"px,"+ty+"px)";
-}
-function getDist(t){
-  var dx=t[0].clientX-t[1].clientX, dy=t[0].clientY-t[1].clientY;
-  return Math.sqrt(dx*dx+dy*dy);
-}
 
-/* 핀치줌 */
-lbImgWrap.addEventListener("touchstart",function(e){
-  if(e.touches.length===2){
-    e.preventDefault();
-    startDist=getDist(e.touches); startScale=scale;
-  } else if(e.touches.length===1){
-    isDragging=true;
-    startX=e.touches[0].clientX-lastTx;
-    startY=e.touches[0].clientY-lastTy;
+lb.addEventListener("touchstart",function(e){
+  swipeStartX=e.touches[0].clientX;
+  swipeStartY=e.touches[0].clientY;
+},{passive:true});
+lb.addEventListener("touchend",function(e){
+  var dx=e.changedTouches[0].clientX-swipeStartX;
+  var dy=e.changedTouches[0].clientY-swipeStartY;
+  if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)){
+    lbNav(dx<0?1:-1);
   }
-},{passive:false});
-lbImgWrap.addEventListener("touchmove",function(e){
-  e.preventDefault();
-  if(e.touches.length===2){
-    var d=getDist(e.touches);
-    scale=Math.min(5,Math.max(1,startScale*(d/startDist)));
-    applyTransform();
-  } else if(e.touches.length===1&&isDragging&&scale>1){
-    tx=e.touches[0].clientX-startX;
-    ty=e.touches[0].clientY-startY;
-    applyTransform();
-  }
-},{passive:false});
-lbImgWrap.addEventListener("touchend",function(e){
-  if(e.touches.length<2){ lastTx=tx; lastTy=ty; }
-  if(e.touches.length===0) isDragging=false;
-  if(scale<=1){ scale=1; tx=0; ty=0; lastTx=0; lastTy=0; applyTransform(); }
-});
-/* 더블탭 줌 */
-var lastTap=0;
-lbImgWrap.addEventListener("touchend",function(e){
-  var now=Date.now();
-  if(now-lastTap<300){
-    scale=scale>1?1:2.5; tx=0; ty=0; lastTx=0; lastTy=0; applyTransform();
-  }
-  lastTap=now;
 });
 
 document.getElementById("lbClose").addEventListener("click",closeLb);
-document.getElementById("lbPrev").addEventListener("click",function(){if(scale===1)lbNav(-1);});
-document.getElementById("lbNext").addEventListener("click",function(){if(scale===1)lbNav(1);});
 lb.addEventListener("click",function(e){if(e.target===lb)closeLb();});
 
 /* ── 드레스코드 팝업 ── */
