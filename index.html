@@ -79,13 +79,13 @@ body.no-scroll{overflow:hidden;}
 .cover-photo-wrap{width:100%;max-width:280px;margin-bottom:20px;opacity:0;animation:fadeInUp 1s ease .5s forwards;}
 .cover-photo-frame{border:1px solid rgba(200,180,160,.35);padding:5px;}
 .cover-photo-frame img{width:100%;display:block;filter:grayscale(10%) contrast(1.04);}
-.cover-date-row{display:flex;width:100%;justify-content:space-between;margin-bottom:4px;opacity:0;animation:fadeInUp 1s ease .7s forwards;}
+.cover-date-row{display:flex;width:100%;justify-content:space-between;margin-bottom:0;position:relative;z-index:2;opacity:0;animation:fadeInUp 1s ease .7s forwards;}
 .cover-month,.cover-day{display:inline-flex;flex-direction:column;}
-.cover-month .num,.cover-day .num{display:block;font-family:"Bodoni Moda",serif;font-size:56px;color:var(--bg-light);line-height:1;font-weight:400;width:100%;}
+.cover-month .num,.cover-day .num{display:block;font-family:"Bodoni Moda",serif;font-size:56px;color:var(--bg-light);line-height:1;font-weight:300;width:100%;}
 .cover-month .text,.cover-day .text{font-family:"Pretendard",sans-serif;font-size:9px;letter-spacing:2px;color:var(--blue-light);text-transform:uppercase;width:100%;display:block;}
 .cover-day{text-align:right;align-items:flex-end;}
 /* 이름 PNG */
-.cover-name-img{width:100%;opacity:0;animation:fadeInUp 1s ease .85s forwards;margin-bottom:4px;filter:brightness(0) invert(1);}
+.cover-name-img{width:100%;opacity:0;animation:fadeInUp 1s ease .85s forwards;margin-bottom:4px;margin-top:-75px;filter:brightness(0) invert(1);}
 .cover-info{margin-top:16px;text-align:center;opacity:0;animation:fadeInUp 1s ease 1s forwards;}
 .cover-info p{font-family:"Pretendard",sans-serif;font-size:13px;letter-spacing:1.5px;color:var(--blue-light);line-height:2.4;}
 .cover-divider{display:inline-block;width:1px;height:10px;background:var(--blue-light);margin:0 10px;opacity:.4;vertical-align:middle;}
@@ -463,7 +463,7 @@ lb.addEventListener("click",function(e){if(e.target===lb)closeLb();});
   var coverEl=document.querySelector(".cover");
   new IntersectionObserver(function(entries){
     btn.classList.toggle("on-cover", entries[0].isIntersecting);
-  },{threshold:0.05}).observe(coverEl);
+  },{threshold:0.025}).observe(coverEl);
 })();
 
 var playing=true, bgm=document.getElementById("bgm");
